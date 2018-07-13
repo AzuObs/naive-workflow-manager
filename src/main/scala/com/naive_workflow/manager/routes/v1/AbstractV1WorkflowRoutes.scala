@@ -11,10 +11,14 @@ import akka.pattern.ask
 import akka.util.Timeout
 import scala.concurrent.duration._
 
-import com.naive_workflow.manager.services.WorkflowService
 import com.naive_workflow.manager.actors.WorkflowActor._
-import com.naive_workflow.manager.database.WorkflowDAOInterface
-import com.naive_workflow.manager.models.{Workflow, WorkflowJsonSupport, Workflows}
+import com.naive_workflow.manager.models.{
+  Workflow,
+  Workflows,
+  ProposedWorkflow,
+  WorkflowJsonSupport
+}
+import com.naive_workflow.manager.utils.WorkflowUtils
 
 import scala.concurrent.Future
 
@@ -23,8 +27,9 @@ import scala.concurrent.Future
 trait AbstractV1WorkflowRoutes extends WorkflowJsonSupport {
 
   def workflowActor: ActorRef
-  implicit def timeout: Timeout
+
   implicit def system: ActorSystem
+  implicit def timeout: Timeout
 
   // daniel - poor error handling
   // daniel - how on earth does execution context work?
@@ -33,19 +38,29 @@ trait AbstractV1WorkflowRoutes extends WorkflowJsonSupport {
     pathPrefix("workflows") {
       pathEnd {
         get {
-          val actorAsk: Future[Future[Workflows]] = (workflowActor ? GetWorkflows).mapTo[Future[Workflows]]
-          val actorRes: Future[Workflows] = Await.result(actorAsk, 5.seconds)
-          val workflows = Await.result(actorRes, 5.seconds)
+          val actorAsk: Future[Future[Vector[Workflow]]] =
+            (workflowActor ? GetWorkflows).mapTo[Future[Vector[Workflow]]]
+          val actorRes: Future[Vector[Workflow]] =
+            Await.result(actorAsk, 5.seconds)
+          val workflows: Vector[Workflow] =
+            Await.result(actorRes, 5.seconds)
+          val result: Workflows =
+            WorkflowUtils.convertWorkflowsTraversableToWorkflowsModel(workflows)
 
-          complete(workflows)
+          complete(result)
         } ~
         post {
-          entity(as[Workflow]) {
-            workflow =>
-              val workflowCreated: Future[Workflow] =
-                (workflowActor ? CreateWorkflow).mapTo[Workflow]
-              onSuccess(workflowCreated) {
-                workflow =>
-                  complete((StatusCodes.Created, workflow))
-              }}}}}
+          entity(as[ProposedWorkflow]) { proposed =>
+            val actorAsk: Future[Future[Workflow]] =
+              (workflowActor ? CreateWorkflow(proposed)).mapTo[Future[Workflow]]
+            val actorRes: Future[Workflow] =
+              Await.result(actorAsk, 5.seconds)
+            val result: Workflow =
+              Await.result(actorRes, 5.seconds)
+
+            complete(result)
+          }
+        }
+      }
+    }
 }

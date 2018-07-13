@@ -2,44 +2,69 @@ package com.naive_workflow.manager.database
 
 import scala.concurrent.{ExecutionContext, Future}
 import scalikejdbc._
+import com.naive_workflow.manager.models.{ProposedWorkflow, Workflow}
 
-import com.naive_workflow.IO
-import com.naive_workflow.manager.models.{Workflow, Workflows}
-
-// daniel queryed implicit?
+// daniel curried implicit?
 class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface {
 
-  def insertWorkflow(nSteps: Int): IO[Workflow] = ???
-
-  def getAllWorkflows: Future[Workflows] =
+  def getAllWorkflows: Future[Vector[Workflow]] =
     Future {
-      // daniel
-      val w = DB.readOnly { implicit session => {
+      DB.readOnly { implicit session => {
+        sql"""
+          | SELECT
+          |   `workflow_id` AS workflowId,
+          |   `n_steps` AS nSteps
+          | FROM
+          |   workflows
+          | WHERE
+          |   `deleted_at` IS NOT NULL
+        """
+          .stripMargin
+          .map(toWorkflow).list.apply() // daniel
+        }.toVector
+      }
+    }
+
+  def insertWorkflow(proposed: ProposedWorkflow): Future[Workflow] =
+    Future {
+      // daniel State[Int] ??
+      var newId: Long = 0
+
+      DB.localTx { implicit session =>
+        newId = sql"""
+          | INSERT INTO
+          |   workflows(`n_steps`)
+          | VALUES
+          |   (${proposed.nSteps})
+        """
+          .stripMargin
+          .updateAndReturnGeneratedKey()
+          .apply()
+      }
+
+      DB.readOnly { implicit session =>
         sql"""
              | SELECT
-             |   workflow_id AS workflowId,
-             |   n_steps AS nSteps
+             |   `workflow_id` AS workflowId,
+             |   `n_steps` AS nSteps
              | FROM
              |   workflows
              | WHERE
-             |   deleted_at IS NOT NULL
-        """.stripMargin
-          .map(toWorkflow).list.apply() // daniel
-        }.foldLeft(Workflows(Vector.empty[Workflow]))(toWorkflows)
+             |   `workflow_id` = $newId
+        """
+          .stripMargin
+          .map(toWorkflow)
+          .single()
+          .apply()
+      } match {
+        case Some(workflow) => workflow
+        case _ => Workflow(0, 0) // daniel
       }
-
-      println(s"DAO: $w\n")
-      w // daniel
     }
 
   private def toWorkflow(rs: WrappedResultSet): Workflow =
     Workflow(
       workflowId = rs.int("workflowId"),
       nSteps = rs.int("nSteps")
-    )
-
-  private def toWorkflows(w: Workflows, workflow: Workflow): Workflows =
-    Workflows(
-      workflows = w.workflows :+ workflow
     )
 }

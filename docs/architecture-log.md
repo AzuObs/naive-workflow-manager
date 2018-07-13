@@ -44,7 +44,3 @@ There is a CloudWatch scheduler that invokes a WorkflowExecutionCleanupWorker ev
 - SQS queues introduce duplicated messages. This means we would have to design our system to tolerate these duplicates. One way to handle this edge case is to implement data as events and use an event sourcing approach. 
   * Take for example the scenario where the SQS message "WorkflowExecutionIncrementationCreation" is duplicated, if we used a naive approach and simply incremented the `workflow_execution.currentStep` in the `workflow_execution` table, the duplicate event would increment this value twice which is wrong.
   * The for example a scenario where we are using an event sourcing strategy where the SQS message "WorkflowExecutionIncrementationCreation with eventUUID=abc123..." is duplicated. When inserting this event into the `workflow_execution_events` table, MySQL would not insert the event because of the UNIQUE constraint for eventUUID. Even if we were using a database that did not have such constraints, when building the state of the WorkflowExecution from its events, the algorithm would simply filter out events with duplicate UUIDs. As a side node, the CQRS optimisation to event sourcing should also be considered.
-
-- Probably not very cheap
-
-- Definitely not implementable in one weekend

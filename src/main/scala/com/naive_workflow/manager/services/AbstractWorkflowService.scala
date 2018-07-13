@@ -1,24 +1,14 @@
 package com.naive_workflow.manager.services
 
-import scala.util.{Failure,Success} // daniel
 import scala.concurrent.Future
-
-import com.naive_workflow.manager.models.{Workflow, Workflows}
+import com.naive_workflow.manager.models.{ProposedWorkflow, Workflow}
 
 trait AbstractWorkflowService extends WorkflowServiceInterface {
 
-  def createWorkflow(nSteps: Int): Workflow = ???
+  def createWorkflow(proposed: ProposedWorkflow): Future[Workflow] =
+    database.insertWorkflow(proposed)
 
-  import scala.concurrent.ExecutionContext.Implicits.global // daniel
-  def getWorkflows: Future[Workflows] =
-    database
-      .getAllWorkflows
-      .transform {
-        case Success(v) =>
-          println(s"Service: $v \n")
-          Success(v)
-        case Failure(e) =>
-          Failure(e)
-      }
+  def getWorkflows: Future[Vector[Workflow]] =
+    database.getAllWorkflows
 
 }
