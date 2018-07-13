@@ -20,5 +20,5 @@ trait WorkflowJsonSupport extends SprayJsonSupport {
 
   implicit val workflowJsonFormat = jsonFormat2(Workflow)
   implicit val workflowsJsonFormat = jsonFormat1(Workflows)
-  implicit val proposedWorkflow = jsonFormat1(ProposedWorkflow)
+  implicit val proposedWorkflowJsonFormat = jsonFormat1(ProposedWorkflow)
 }

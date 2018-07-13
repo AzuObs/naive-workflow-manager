@@ -20,7 +20,9 @@ class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface 
           |   `deleted_at` IS NOT NULL
         """
           .stripMargin
-          .map(toWorkflow).list.apply() // daniel
+          .map(toWorkflow)
+          .list
+          .apply()
         }.toVector
       }
     }
@@ -56,8 +58,8 @@ class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface 
           .single()
           .apply()
       } match {
+          // daniel ?
         case Some(workflow) => workflow
-        case _ => Workflow(0, 0) // daniel
       }
     }
 

@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.util.{Failure, Success}
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.StatusCodes // daniel error handling
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
@@ -41,9 +41,9 @@ trait AbstractV1WorkflowRoutes extends WorkflowJsonSupport {
           val actorAsk: Future[Future[Vector[Workflow]]] =
             (workflowActor ? GetWorkflows).mapTo[Future[Vector[Workflow]]]
           val actorRes: Future[Vector[Workflow]] =
-            Await.result(actorAsk, 5.seconds)
+            Await.result(actorAsk, timeout.duration)
           val workflows: Vector[Workflow] =
-            Await.result(actorRes, 5.seconds)
+            Await.result(actorRes, timeout.duration)
           val result: Workflows =
             WorkflowUtils.convertWorkflowsTraversableToWorkflowsModel(workflows)
 
@@ -52,11 +52,12 @@ trait AbstractV1WorkflowRoutes extends WorkflowJsonSupport {
         post {
           entity(as[ProposedWorkflow]) { proposed =>
             val actorAsk: Future[Future[Workflow]] =
+              // daniel ScheduleWorkflowCreation ??
               (workflowActor ? CreateWorkflow(proposed)).mapTo[Future[Workflow]]
             val actorRes: Future[Workflow] =
-              Await.result(actorAsk, 5.seconds)
+              Await.result(actorAsk, timeout.duration)
             val result: Workflow =
-              Await.result(actorRes, 5.seconds)
+              Await.result(actorRes, timeout.duration)
 
             complete(result)
           }

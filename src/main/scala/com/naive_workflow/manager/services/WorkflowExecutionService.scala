@@ -2,8 +2,10 @@ package com.naive_workflow.manager.services
 
 import com.naive_workflow.manager.database.{WorkflowExecutionDAO, WorkflowExecutionDAOInterface}
 
-object WorkflowExecutionService extends AbstractWorkflowExecutionService {
+case class WorkflowExecutionService(db: WorkflowExecutionDAOInterface)
+  extends AbstractWorkflowExecutionService {
 
-  def database: WorkflowExecutionDAOInterface = WorkflowExecutionDAO
+  // daniel implicit pattern?
+  def database: WorkflowExecutionDAOInterface = db
 
 }

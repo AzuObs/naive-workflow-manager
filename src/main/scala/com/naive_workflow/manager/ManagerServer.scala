@@ -4,16 +4,15 @@ import scala.util.{Failure, Success}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.actor.{Props, ActorRef, ActorSystem}
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import scalikejdbc.ConnectionPool
-
 import com.naive_workflow.manager.actors.{WorkflowActor, WorkflowExecutionActor}
 import com.naive_workflow.manager.routes.v1.AbstractV1Routes
-import com.naive_workflow.manager.database.WorkflowDAO
+import com.naive_workflow.manager.database.{WorkflowDAO, WorkflowExecutionDAO}
 
 // daniel healthcheckz endpoint
 // daniel unit test Services
@@ -42,12 +41,13 @@ object ManagerServer extends App with AbstractV1Routes {
     s"jdbc:mysql://$dbHost/$dbName?autoReconnect=true&useSSL=false", dbUser, dbPass)
 
   // daniel "new" introduces state
-  val db = new WorkflowDAO()(blockingDispatcher)
+  val workflowDb = new WorkflowDAO()(blockingDispatcher)
+  val workflowExecutionDb = new WorkflowExecutionDAO()(blockingDispatcher)
 
   val workflowActor: ActorRef =
-    system.actorOf(Props(WorkflowActor(db)), "workflowActor")
+    system.actorOf(Props(WorkflowActor(workflowDb)), "workflowActor")
   val workflowExecutionActor: ActorRef =
-    system.actorOf(WorkflowExecutionActor.props, "workflowExecutionsActor")
+    system.actorOf(Props(WorkflowExecutionActor(workflowExecutionDb)), "workflowExecutionsActor")
 
   // daniel look into this whole dispatcher affair
   Http()
@@ -57,7 +57,7 @@ object ManagerServer extends App with AbstractV1Routes {
       case Failure(_) => println(s"$appName server unable to bind at $serverHost:$serverPort")
     }
 
-  // daniel "local" files and configs?
+  // daniel add "local" (vs "production) to filenames and resource.conf?
   // daniel revisit the interface -> abstract -> class pattern we've been using
   // daniel actor logging?
   // daniel necessary to keep the app alive?

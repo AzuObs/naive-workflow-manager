@@ -8,7 +8,7 @@ CREATE TABLE `workflows` (
   `n_steps` INT(11) UNSIGNED NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT NOW(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  `deleted_at` TIMESTAMP,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`workflow_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -19,7 +19,7 @@ CREATE TABLE `workflow_executions` (
   `current_step_index` INT(11) UNSIGNED NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT NOW(),
   `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-  `deleted_at` TIMESTAMP,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`workflow_execution_id`),
   CONSTRAINT `fk_workflow_id` FOREIGN KEY (`workflow_id`) REFERENCES `workflows` (`workflow_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

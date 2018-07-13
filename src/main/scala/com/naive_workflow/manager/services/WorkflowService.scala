@@ -4,6 +4,7 @@ import com.naive_workflow.manager.database.WorkflowDAOInterface
 
 case class WorkflowService(db: WorkflowDAOInterface) extends AbstractWorkflowService {
 
+  // daniel use implicit def pattern
   def database: WorkflowDAOInterface = db
 
 }
