@@ -1,9 +1,9 @@
 package com.naive_workflow.manager.services
 
-import com.naive_workflow.manager.database.{WorkflowDAO, WorkflowDAOInterface}
+import com.naive_workflow.manager.database.{WorkflowDAOInterface}
 
-object WorkflowService extends AbstractWorkflowService {
+case class WorkflowService(db: WorkflowDAOInterface) extends AbstractWorkflowService {
 
-  def database: WorkflowDAOInterface = WorkflowDAO
+  def database: WorkflowDAOInterface = db
 
 }

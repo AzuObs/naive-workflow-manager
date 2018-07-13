@@ -7,8 +7,13 @@ final case class Workflow(
   nSteps: Int
 )
 
+final case class Workflows(
+  workflows: Vector[Workflow]
+)
+
 trait WorkflowJsonSupport extends SprayJsonSupport {
   import spray.json.DefaultJsonProtocol._
 
   implicit val workflowJsonFormat = jsonFormat2(Workflow)
+  implicit val workflowsJsonFormat = jsonFormat1(Workflows)
 }
