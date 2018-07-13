@@ -17,6 +17,6 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http"   % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-http-spray-json" % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-stream" % versions.akka, // daniel needed?
+  "mysql" % "mysql-connector-java" % versions.mysqlConnector,
   "org.scalikejdbc" %% "scalikejdbc" % versions.jdbc,
-  "mysql" % "mysql-connector-java" % versions.mysqlConnector
 )
