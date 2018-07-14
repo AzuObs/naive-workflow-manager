@@ -60,6 +60,9 @@ object ManagerServer extends App with V1Routes {
   // daniel can sbt flag when imports are unused?
   // daniel how on earth does execution context work?
   // daniel eliminate compiling warnings/errors
-  // daniel what does this Await do?
+  // daniel add meaningful comments
+  // daniel loggin in general?
+  // daniel test jobs routes
+  // daniel look at all queries and add indexes
   Await.result(system.whenTerminated, Duration.Inf)
 }

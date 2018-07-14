@@ -1,20 +1,16 @@
 package com.naive_workflow.manager.routes.v1
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.StatusCodes // daniel think about these
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-
 import com.naive_workflow.manager.actors.WorkflowExecutionActor._
-import com.naive_workflow.manager.models.{
-  WorkflowExecution,
-  ProposedWorkflowExecution,
-  ProposedWorkflowExecutionIncrementation => ProposedIncrementation,
-  WorkflowExecutionJsonSupport
-}
+import com.naive_workflow.manager.models._
+import com.naive_workflow.manager.types.ServiceResponse
 
 trait V1WorkflowExecutionRoutes extends WorkflowExecutionJsonSupport {
 
@@ -27,31 +23,39 @@ trait V1WorkflowExecutionRoutes extends WorkflowExecutionJsonSupport {
     pathPrefix("workflows" / IntNumber / "executions") { workflowId => {
       pathEnd {
         post {
-          val actorAs: Future[Future[WorkflowExecution]] =
-            (workflowExecutionActor ? CreateWorkflowExecution(ProposedWorkflowExecution(workflowId)))
-              .mapTo[Future[WorkflowExecution]]
-          val actorRes: Future[WorkflowExecution] =
-            Await.result(actorAs, timeout.duration)
-          val workflowExecution: WorkflowExecution =
-            Await.result(actorRes, timeout.duration)
+          val askService: ServiceResponse[WorkflowExecution] =
+            for {
+              askActor   <- (workflowExecutionActor ? CreateWorkflowExecution(ProposedWorkflowExecution(workflowId)))
+                .mapTo[ServiceResponse[WorkflowExecution]]
+              askService <- askActor
+            } yield askService
 
-          // daniel - giving an incorrect id definitely causes the server to fail, handle error
-          complete(workflowExecution)
+          Await.result(askService, timeout.duration) match {
+            case Right(execution) =>
+              complete(StatusCodes.Created, execution)
+            case Left(exception) =>
+              complete(exception.httpStatus, exception.message)
+          }
         }}
     } ~
     pathPrefix("workflows" / IntNumber / "executions" / IntNumber / "incrementations") {
       (workflowId, executionId) =>
         pathEnd {
           post {
-            val actorAs: Future[Future[WorkflowExecution]] =
-              (workflowExecutionActor ? CreateExecutionIncrementation(ProposedIncrementation(workflowId, executionId)))
-                .mapTo[Future[WorkflowExecution]]
-            val actorRes: Future[WorkflowExecution] =
-              Await.result(actorAs, timeout.duration)
-            val workflowExecution: WorkflowExecution =
-              Await.result(actorRes, timeout.duration)
+            val askService: ServiceResponse[WorkflowExecution] =
+              for {
+                askActor   <- (workflowExecutionActor ? CreateExecutionIncrementation(
+                  ProposedWorkflowExecutionIncrementation(workflowId, executionId)))
+                    .mapTo[ServiceResponse[WorkflowExecution]]
+                askService <- askActor
+              } yield askService
 
-            complete(workflowExecution)
+            Await.result(askService, timeout.duration) match {
+              case Right(execution) =>
+                complete(StatusCodes.Created, execution)
+              case Left(exception) =>
+                complete(exception.httpStatus, exception.message)
+            }
           }}}}
 
 }

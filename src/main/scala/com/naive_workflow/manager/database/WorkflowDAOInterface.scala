@@ -1,12 +1,12 @@
 package com.naive_workflow.manager.database
 
-import scala.concurrent.Future
+import com.naive_workflow.manager.types.DAOResponse
 import com.naive_workflow.manager.models.{ProposedWorkflow, Workflow}
 
 trait WorkflowDAOInterface {
 
-  def getAllWorkflows: Future[Vector[Workflow]]
+  def getAllWorkflows: DAOResponse[Vector[Workflow]]
 
-  def insertWorkflow(proposed: ProposedWorkflow): Future[Workflow]
+  def insertWorkflow(proposed: ProposedWorkflow): DAOResponse[Workflow]
 
 }

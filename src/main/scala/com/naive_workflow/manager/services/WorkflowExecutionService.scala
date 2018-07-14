@@ -1,14 +1,13 @@
 package com.naive_workflow.manager.services
 
-import com.naive_workflow.manager.database.WorkflowExecutionDAOInterface
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.immutable.Vector
+
+import com.naive_workflow.manager.database.WorkflowExecutionDAOInterface
+import com.naive_workflow.manager.types.ServiceResponse
 import com.naive_workflow.manager.models.{
-  WorkflowExecution,
   ProposedWorkflowExecution,
-  ProposedWorkflowExecutionIncrementation
+  ProposedWorkflowExecutionIncrementation,
+  WorkflowExecution
 }
 
 case class WorkflowExecutionService(db: WorkflowExecutionDAOInterface)
@@ -17,19 +16,19 @@ case class WorkflowExecutionService(db: WorkflowExecutionDAOInterface)
   def database: WorkflowExecutionDAOInterface = db
 
   def createWorkflowExecution(proposed: ProposedWorkflowExecution):
-    Future[WorkflowExecution] =
+    ServiceResponse[WorkflowExecution] =
       database.insertWorkflowExecution(proposed)
 
   def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
-    Future[WorkflowExecution] =
+    ServiceResponse[WorkflowExecution] =
       database.incrementWorkflowExecution(proposed)
 
-  def deletedEndedWorkflowExecutions: Future[Vector[WorkflowExecution]] =
-    // daniel working OK? how about error handling?
-    // daniel probably make this as a single DAO call, making it less error prone
-    for {
-      getExecutions  <- database.getTerminatedWorkflowExecutions
-      delExecutions  <- database.deleteWorkflowExecutions(getExecutions)
-    } yield delExecutions
+  // daniel how does error handling behave? use .fold instead?
+  def deletedEndedWorkflowExecutions: ServiceResponse[Vector[WorkflowExecution]] = ???
+//    for {
+//      ioExecutions   <- database.getTerminatedWorkflowExecutions
+//      executions     <- ioExecutions
+//      delExecutions  <- database.deleteWorkflowExecutions(executions)
+//    } yield delExecutions
 
 }

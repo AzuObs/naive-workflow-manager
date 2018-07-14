@@ -12,7 +12,7 @@ import com.naive_workflow.manager.models.{
 object WorkflowExecutionActor {
   final case class CreateWorkflowExecution(proposed: ProposedWorkflowExecution)
   final case class CreateExecutionIncrementation(proposed: ProposedIncrementation)
-  final case object DeleteEndedWorkflowExecutions
+  final case object CreateExecutionsCleanupJob
 
   def props: Props = Props[WorkflowExecutionActor]
 }
@@ -25,7 +25,7 @@ case class WorkflowExecutionActor(db: WorkflowExecutionDAOInterface) extends Act
       sender() ! WorkflowExecutionService(db).createWorkflowExecution(proposed)
     case CreateExecutionIncrementation(proposed) =>
       sender() ! WorkflowExecutionService(db).incrementWorkflowExecution(proposed)
-    case DeleteEndedWorkflowExecutions =>
+    case CreateExecutionsCleanupJob =>
       sender() ! WorkflowExecutionService(db).deletedEndedWorkflowExecutions
   }
 

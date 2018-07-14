@@ -1,7 +1,8 @@
 package com.naive_workflow.manager.database
 
-import scala.concurrent.Future
 import scala.collection.immutable.Vector
+
+import com.naive_workflow.manager.types.DAOResponse
 import com.naive_workflow.manager.models.{
   WorkflowExecution,
   ProposedWorkflowExecution,
@@ -10,13 +11,16 @@ import com.naive_workflow.manager.models.{
 
 trait WorkflowExecutionDAOInterface {
 
-  def insertWorkflowExecution(proposed: ProposedWorkflowExecution):
-    Future[WorkflowExecution]
-  def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
-    Future[WorkflowExecution]
   def getTerminatedWorkflowExecutions:
-    Future[Vector[WorkflowExecution]]
+    DAOResponse[Vector[WorkflowExecution]]
+
+  def insertWorkflowExecution(proposed: ProposedWorkflowExecution):
+    DAOResponse[WorkflowExecution]
+
+  def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
+    DAOResponse[WorkflowExecution]
+
   def deleteWorkflowExecutions(workflowExecutions: Vector[WorkflowExecution]):
-    Future[Vector[WorkflowExecution]]
+    DAOResponse[Vector[WorkflowExecution]]
 
 }

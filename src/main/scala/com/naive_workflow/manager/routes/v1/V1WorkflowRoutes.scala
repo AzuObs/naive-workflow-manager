@@ -1,23 +1,17 @@
 package com.naive_workflow.manager.routes.v1
 
 import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.{ActorRef, ActorSystem}
-import akka.http.scaladsl.model.StatusCodes // daniel error handling
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-
+import com.naive_workflow.manager.types.ServiceResponse
 import com.naive_workflow.manager.actors.WorkflowActor._
-import com.naive_workflow.manager.models.{
-  Workflow,
-  Workflows,
-  ProposedWorkflow,
-  WorkflowJsonSupport
-}
-import com.naive_workflow.manager.utils.WorkflowUtils
-
-import scala.concurrent.Future
+import com.naive_workflow.manager.models._
+import com.naive_workflow.manager.utils.{WorkflowUtils => Utils}
 
 trait V1WorkflowRoutes extends WorkflowJsonSupport {
 
@@ -30,27 +24,33 @@ trait V1WorkflowRoutes extends WorkflowJsonSupport {
     pathPrefix("workflows") {
       pathEnd {
         get {
-          val actorAsk: Future[Future[Vector[Workflow]]] =
-            (workflowActor ? GetWorkflows).mapTo[Future[Vector[Workflow]]]
-          val actorRes: Future[Vector[Workflow]] =
-            Await.result(actorAsk, timeout.duration)
-          val workflows: Vector[Workflow] =
-            Await.result(actorRes, timeout.duration)
-          val result: Workflows =
-            WorkflowUtils.convertWorkflowsTraversableToWorkflowsModel(workflows)
+          val askService: ServiceResponse[Vector[Workflow]] =
+            for {
+              askActor   <- (workflowActor ? GetWorkflows).mapTo[ServiceResponse[Vector[Workflow]]]
+              askService <- askActor
+            } yield askService
 
-          complete(result)
+          Await.result(askService, timeout.duration) match {
+            case Right(wkfls) =>
+              val workflows: Workflows = Utils.convertWorkflowsTraversableToWorkflowsModel(wkfls)
+              complete(StatusCodes.OK, workflows)
+            case Left(exception) => complete(exception.httpStatus, exception.message)
+          }
         } ~
         post {
           entity(as[ProposedWorkflow]) { proposed =>
-            val actorAsk: Future[Future[Workflow]] =
-              (workflowActor ? CreateWorkflow(proposed)).mapTo[Future[Workflow]]
-            val actorRes: Future[Workflow] =
-              Await.result(actorAsk, timeout.duration)
-            val result: Workflow =
-              Await.result(actorRes, timeout.duration)
+            val askService: ServiceResponse[Workflow] =
+              for {
+                askActor   <- (workflowActor ? CreateWorkflow).mapTo[ServiceResponse[Workflow]]
+                askService <- askActor
+              } yield askService
 
-            complete(result)
+            Await.result(askService, timeout.duration) match {
+              case Right(workflow) =>
+                complete(StatusCodes.Created, workflow)
+              case Left(exception) =>
+                complete(exception.httpStatus, exception.message)
+            }
           }}}}
 
 }

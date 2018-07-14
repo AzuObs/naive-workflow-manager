@@ -4,14 +4,14 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
 import com.naive_workflow.Datetime
 
-final case class Workflow(
+final case class Workflow (
   workflowId: Int,
   nSteps: Int,
   createdAt: Datetime,
   updatedAt: Datetime
 )
 
-final case class Workflows(
+final case class Workflows (
   workflows: Vector[Workflow]
 )
 

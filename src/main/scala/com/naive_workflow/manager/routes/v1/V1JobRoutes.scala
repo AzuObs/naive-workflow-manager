@@ -1,21 +1,21 @@
 package com.naive_workflow.manager.routes.v1
 
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-
+import com.naive_workflow.manager.types.ServiceResponse
 import com.naive_workflow.manager.utils.WorkflowExecutionUtils
-import com.naive_workflow.manager.actors.WorkflowExecutionActor.DeleteEndedWorkflowExecutions
+import com.naive_workflow.manager.actors.WorkflowExecutionActor.CreateExecutionsCleanupJob
 import com.naive_workflow.manager.models.{
   WorkflowExecution,
-  WorkflowExecutions,
   WorkflowExecutionJsonSupport
 }
 
-// test jobs routes
 trait V1JobRoutes extends WorkflowExecutionJsonSupport {
 
     def workflowExecutionActor: ActorRef
@@ -27,17 +27,22 @@ trait V1JobRoutes extends WorkflowExecutionJsonSupport {
       pathPrefix("jobs" / "delete-terminated-workflow-executions" ) {
         pathEnd {
           post {
-            val actorAs: Future[Future[Vector[WorkflowExecution]]] =
-              (workflowExecutionActor ? DeleteEndedWorkflowExecutions)
-                .mapTo[Future[Vector[WorkflowExecution]]]
-            val actorRes: Future[Vector[WorkflowExecution]] =
-              Await.result(actorAs, timeout.duration)
-            val workflowExecutions: Vector[WorkflowExecution] =
-              Await.result(actorRes, timeout.duration)
-            val result: WorkflowExecutions =
-              WorkflowExecutionUtils.executionsTraversableToExecutionsModel(workflowExecutions)
+            val askService: ServiceResponse[Vector[WorkflowExecution]] =
+              for {
+                askActor   <-
+                  (workflowExecutionActor ? CreateExecutionsCleanupJob)
+                    .mapTo[ServiceResponse[Vector[WorkflowExecution]]]
+                askService <-
+                  askActor
+              } yield askService
 
-            complete(result)
+            Await.result(askService, timeout.duration) match {
+              case Right(execs) =>
+                val executions = WorkflowExecutionUtils.executionsTraversableToExecutionsModel(execs)
+                complete(StatusCodes.Created, executions)
+              case Left(exception) =>
+                complete(exception.httpStatus, exception.message)
+            }
           }}}
 
 }

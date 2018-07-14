@@ -1,23 +1,26 @@
 package com.naive_workflow.manager.services
 
-import scala.concurrent.Future
 import scala.collection.immutable.Vector
-import com.naive_workflow.manager.models.{
-  WorkflowExecution,
-  ProposedWorkflowExecution,
-  ProposedWorkflowExecutionIncrementation
-}
+
 import com.naive_workflow.manager.database.WorkflowExecutionDAOInterface
+import com.naive_workflow.manager.types.ServiceResponse
+import com.naive_workflow.manager.models.{
+  ProposedWorkflowExecution,
+  ProposedWorkflowExecutionIncrementation,
+  WorkflowExecution
+}
 
 trait WorkflowExecutionServiceInterface {
 
   protected def database: WorkflowExecutionDAOInterface
 
   def createWorkflowExecution(proposed: ProposedWorkflowExecution):
-    Future[WorkflowExecution]
+    ServiceResponse[WorkflowExecution]
+
   def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
-    Future[WorkflowExecution]
+    ServiceResponse[WorkflowExecution]
+
   def deletedEndedWorkflowExecutions:
-    Future[Vector[WorkflowExecution]]
+    ServiceResponse[Vector[WorkflowExecution]]
 
 }
