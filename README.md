@@ -17,7 +17,8 @@ Functional:
 # Run Dev
 
 ```bash
-docker-compose up
+docker-compose --file=docker-compose.yml --file=docker-compose.crontab.yml build
+docker-compose --file=docker-compose.yml --file=docker-compose.crontab.yml up
 sbt run
 ```
 
@@ -25,7 +26,8 @@ sbt run
 
 // daniel TODO
 ```bash
-docker-compose up
+docker-compose --file=docker-compose.yml build
+docker-compose --file=docker-compose.yml up
 sbt test
 ```
 
@@ -52,3 +54,27 @@ curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
 # Periodic Jobs
 
 // daniel crontab documentation
+
+
+// STRONG
+// daniel test everything from scratch
+// daniel create unit tests, integration tests, docker-compose.test.yml, ./tests.sh
+// daniel create crontab for scripts, maybe a Docker image?
+// daniel rework the whole git history
+
+// AVERAGE
+// daniel eliminate compiling warnings/errors
+// daniel add more meaningful comments
+// daniel Dockerfile, "./publish.sh", and "production-like" working
+// daniel "/healthcheckz" endpoint
+// daniel can sbt flag when imports are unused?
+
+// WEAK
+// daniel what is a dispatcher?
+// daniel how on earth does execution context work?
+// daniel login (actors, app errors) in general?
+// daniel function toDateTime(s: String): Datetime, in com.naive_workflow.utils ??
+// daniel add EitherT
+
+// NEW TODOS GO HERE
+// Make architecture doc less verbose, potentially add it here

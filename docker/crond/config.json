@@ -1,0 +1,4 @@
+[{
+  "schedule": "@every 1m",
+  "command": "curl -X POST http://$HOST:$PORT/v1/jobs/delete-terminated-workflow-executions"
+}]

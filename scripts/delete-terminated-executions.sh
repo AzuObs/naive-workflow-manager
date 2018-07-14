@@ -1,5 +1,0 @@
-#!/bin/bash
-
-echo "Creating Cleanup Job"
-
-curl -X POST "https://localhost:8080/jobs/workflow-execution-cleanup"
