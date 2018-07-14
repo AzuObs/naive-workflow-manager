@@ -62,7 +62,10 @@ object ManagerServer extends App with V1Routes {
   // daniel eliminate compiling warnings/errors
   // daniel add meaningful comments
   // daniel loggin in general?
-  // daniel test jobs routes
+  // daniel crontab working
+  // daniel function toDateTime(s: String): Datetime, in com.naive_workflow.utils ??
+  // daniel every jobs route thoroughly
+  // daniel rework the whole git history
   // daniel look at all queries and add indexes
   Await.result(system.whenTerminated, Duration.Inf)
 }
