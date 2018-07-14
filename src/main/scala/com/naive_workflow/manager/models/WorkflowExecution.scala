@@ -16,7 +16,13 @@ final case class WorkflowExecutions(
   workflowExecutions: Vector[WorkflowExecution]
 )
 
+// daniel enrich this with optional values?
 final case class ProposedWorkflowExecution(
+  workflowId: Int
+)
+
+final case class ProposedWorkflowExecutionIncrementation(
+  workflowExecutionId: Int,
   workflowId: Int
 )
 
@@ -26,4 +32,5 @@ trait WorkflowExecutionJsonSupport extends SprayJsonSupport {
   implicit val workflowExecutionJsonFormat = jsonFormat5(WorkflowExecution)
   implicit val workflowExecutionsJsonFormat = jsonFormat1(WorkflowExecutions)
   implicit val proposedWorkflowExecutionJsonFormat = jsonFormat1(ProposedWorkflowExecution)
+  implicit val proposedWorkflowExecutionIncrementationJsonFormat = jsonFormat2(ProposedWorkflowExecutionIncrementation)
 }
