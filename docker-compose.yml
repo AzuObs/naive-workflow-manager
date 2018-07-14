@@ -10,18 +10,3 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     command: mysqld --max_allowed_packet=128M --sql-mode=""
-
-# daniel env variables (host, port)
-  scheduler_service:
-    build:
-      context: .
-      dockerfile: docker/crond/Dockerfile
-    restart: always
-    network_mode: host
-    environment:
-      HOST: "localhost"
-      PORT: "8080"
-    volumes:
-      - "./docker/crontab/config.json:/opt/crontab/config.json"
-      - "./docker/crontab/logs:/var/log/crontab"
-      - "/var/run/docker.sock:/var/run/docker.sock"
