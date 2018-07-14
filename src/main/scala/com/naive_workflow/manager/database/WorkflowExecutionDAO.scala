@@ -1,7 +1,5 @@
 package com.naive_workflow.manager.database
 
-import java.time.ZonedDateTime
-
 import scala.collection.immutable.Vector
 import scala.concurrent.{ExecutionContext, Future}
 import scalikejdbc._
@@ -11,9 +9,7 @@ import com.naive_workflow.manager.models.{
   WorkflowExecution
 }
 
-// daniel createdAt, updatedAt to Workflow?
-
-class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
+case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
   extends WorkflowExecutionDAOInterface {
 
   def insertWorkflowExecution(proposed: ProposedWorkflowExecution): Future[WorkflowExecution] =
@@ -70,9 +66,7 @@ class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
             | WHERE
             |   we.`current_step_index` < w.`n_steps`
             |   AND w.`workflow_id` = ${proposed.workflowId}
-            |   AND w.`deleted_at` IS NULL
             |   AND we.`workflow_execution_id` = ${proposed.workflowExecutionId}
-            |   AND we.`deleted_at` IS NULL
             """
               .stripMargin
               .update
@@ -103,7 +97,6 @@ class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
       }
     }
 
-  // daniel add deleted_at condition even if you can't delete workflows
   // daniel look at all queries and add indexes
   def getTerminatedWorkflowExecutions: Future[Vector[WorkflowExecution]] =
     Future {
@@ -120,7 +113,6 @@ class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
           |   INNER JOIN workflow_executions we ON w.`workflow_id` = we.`workflow_id`
           | WHERE
           |   w.`n_steps` = we.`current_step_index`
-          |   AND we.`deleted_at` IS NULL
           """
           .stripMargin
           .map(toWorkflowExecution)
@@ -129,21 +121,19 @@ class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
       }.toVector
     }}
 
+  // daniel what if number of deletions doesn't match number of ids sent over?
   def deleteWorkflowExecutions(workflowExecutions: Vector[WorkflowExecution]):
     Future[Vector[WorkflowExecution]] =
       Future {
         DB.localTx { implicit session =>
-          val now = ZonedDateTime.now()
           val batchValues: Seq[Seq[Any]] =
-            workflowExecutions.map(w => Seq[Any](now, w.workflowExecutionId))
+            workflowExecutions.map(w => Seq[Any](w.workflowExecutionId))
 
           sql"""
-            | UPDATE
-            |  workflow_executions
-            | SET
-            |  `deleted_at` = ?
+            | DELETE FROM
+            |   workflow_executions
             | WHERE
-            |  `workflow_execution_id` = ?
+            |   `workflow_execution_id` = ?
             """
             .stripMargin
             .batch(batchValues: _*)
@@ -159,5 +149,5 @@ class WorkflowExecutionDAO()(implicit ec: ExecutionContext)
       currentStepIndex = rs.int("currentStepIndex"),
       createdAt = rs.string("createdAt"),
       updatedAt = rs.string("updatedAt")
-    )// daniel
+    )
 }

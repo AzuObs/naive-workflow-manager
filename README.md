@@ -1,1 +1,1 @@
-// daniel how to run app
+// daniel how to run, test app

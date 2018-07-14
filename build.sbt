@@ -16,7 +16,7 @@ scalaVersion := versions.scala
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http"   % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-http-spray-json" % versions.akkaHttp,
-  "com.typesafe.akka" %% "akka-stream" % versions.akka, // daniel needed?
+  "com.typesafe.akka" %% "akka-stream" % versions.akka,
   "mysql" % "mysql-connector-java" % versions.mysqlConnector,
   "org.scalikejdbc" %% "scalikejdbc" % versions.jdbc,
 )

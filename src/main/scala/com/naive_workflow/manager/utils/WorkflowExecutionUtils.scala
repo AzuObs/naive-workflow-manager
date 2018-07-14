@@ -1,10 +1,13 @@
 package com.naive_workflow.manager.utils
 
-import com.naive_workflow.manager.models.{WorkflowExecution, WorkflowExecutions}
+import com.naive_workflow.manager.models.{
+  WorkflowExecution => Execution,
+  WorkflowExecutions => Executions
+}
 
 object WorkflowExecutionUtils {
-  // daniel make generic?
-  def executionsTraversableToExecutionsModel(ws: Traversable[WorkflowExecution]): WorkflowExecutions =
-    ws.foldLeft(WorkflowExecutions(Vector()))((z, w) => WorkflowExecutions(z.workflowExecutions :+ w))
+
+  def executionsTraversableToExecutionsModel(ws: Traversable[Execution]): Executions =
+    ws.foldLeft(Executions(Vector()))((z, w) => Executions(z.workflowExecutions :+ w))
 
 }

@@ -5,19 +5,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 import com.naive_workflow.manager.models.{ProposedWorkflow, Workflow}
 
-// daniel curried implicit?
-class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface {
+case class WorkflowDAO(implicit ec: ExecutionContext) extends WorkflowDAOInterface {
   def getAllWorkflows: Future[Vector[Workflow]] =
     Future {
       DB.readOnly { implicit session => {
         sql"""
           | SELECT
           |   `workflow_id` AS workflowId,
-          |   `n_steps` AS nSteps
+          |   `n_steps` AS nSteps,
+          |   `created_at` AS createdAt,
+          |   `updated_at` AS updatedAt
           | FROM
           |   workflows
-          | WHERE
-          |   `deleted_at` IS NOT NULL
         """
           .stripMargin
           .map(toWorkflow)
@@ -45,13 +44,15 @@ class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface 
 
       DB.readOnly { implicit session =>
         sql"""
-          | SELECT
+          |SELECT
           |   `workflow_id` AS workflowId,
-          |   `n_steps` AS nSteps
+          |   `n_steps` AS nSteps,
+          |   `created_at` AS createdAt,
+          |   `updated_at` AS updatedAt
           | FROM
           |   workflows
           | WHERE
-          |   `workflow_id` = $newId
+          |   `workflow_id` =  $newId
         """
           .stripMargin
           .map(toWorkflow)
@@ -66,7 +67,9 @@ class WorkflowDAO()(implicit ec: ExecutionContext) extends WorkflowDAOInterface 
   private def toWorkflow(rs: WrappedResultSet): Workflow =
     Workflow(
       workflowId = rs.int("workflowId"),
-      nSteps = rs.int("nSteps")
+      nSteps = rs.int("nSteps"),
+      createdAt = rs.string("createdAt"),
+      updatedAt = rs.string("updatedAt")
     )
 
 }

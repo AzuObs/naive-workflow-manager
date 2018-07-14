@@ -2,14 +2,14 @@ package com.naive_workflow.manager.models
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 
-import com.naive_workflow.Timestamp
+import com.naive_workflow.Datetime
 
 final case class WorkflowExecution(
   workflowExecutionId: Int,
   workflowId: Int,
   currentStepIndex: Int,
-  createdAt: Timestamp,
-  updatedAt: Timestamp
+  createdAt: Datetime,
+  updatedAt: Datetime
 )
 
 final case class WorkflowExecutions(
@@ -29,8 +29,13 @@ final case class ProposedWorkflowExecutionIncrementation(
 trait WorkflowExecutionJsonSupport extends SprayJsonSupport {
   import spray.json.DefaultJsonProtocol._
 
-  implicit val workflowExecutionJsonFormat = jsonFormat5(WorkflowExecution)
-  implicit val workflowExecutionsJsonFormat = jsonFormat1(WorkflowExecutions)
-  implicit val proposedWorkflowExecutionJsonFormat = jsonFormat1(ProposedWorkflowExecution)
-  implicit val proposedWorkflowExecutionIncrementationJsonFormat = jsonFormat2(ProposedWorkflowExecutionIncrementation)
+  implicit val workflowExecutionJsonFormat =
+    jsonFormat5(WorkflowExecution)
+  implicit val workflowExecutionsJsonFormat =
+    jsonFormat1(WorkflowExecutions)
+  implicit val proposedWorkflowExecutionJsonFormat =
+    jsonFormat1(ProposedWorkflowExecution)
+  implicit val proposedWorkflowExecutionIncrementationJsonFormat =
+    jsonFormat2(ProposedWorkflowExecutionIncrementation)
+
 }

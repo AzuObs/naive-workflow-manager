@@ -13,8 +13,11 @@ trait WorkflowExecutionServiceInterface {
 
   protected def database: WorkflowExecutionDAOInterface
 
-  def createWorkflowExecution(proposed: ProposedWorkflowExecution): Future[WorkflowExecution]
-  def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation): Future[WorkflowExecution]
-  def cleanupTerminatedWorkflowExecutions: Future[Vector[WorkflowExecution]]
+  def createWorkflowExecution(proposed: ProposedWorkflowExecution):
+    Future[WorkflowExecution]
+  def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
+    Future[WorkflowExecution]
+  def deletedEndedWorkflowExecutions:
+    Future[Vector[WorkflowExecution]]
 
 }
