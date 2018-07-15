@@ -18,7 +18,6 @@ case class WorkflowService(db: WorkflowDAOInterface)
   def getWorkflows: ServiceResponse[Vector[Workflow]] =
     database.getAllWorkflows
 
-  // daniel add tests for this
   def createWorkflow(proposed: ProposedWorkflow): ServiceResponse[Workflow] =
     proposed.nSteps match {
       case gt0 if gt0 < 1 =>

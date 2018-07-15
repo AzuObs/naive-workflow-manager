@@ -1,3 +1,8 @@
+// daniel rework the whole git history  
+// daniel Make architecture doc less verbose, potentially add it here  
+// daniel add more meaningful comments  
+// daniel one last check that everything works
+
 # App Architecture
 
 The app is a fairly standard scala server that uses akka http, akka actors, and mysql.  
@@ -23,14 +28,15 @@ docker-compose up
 sbt run
 ```
 
+
 # Run Tests
 
-// daniel maybe if you add a separate container for testing?
 ```bash
 docker-compose build
 docker-compose up
 sbt test
 ```
+
 
 # Periodic Jobs
 
@@ -40,41 +46,42 @@ docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml up
 sbt run
 ```
 
-# Routes
+
+# HTTP Routes
 
 ```text
-curl -X POST /v1/jobs/delete-terminated-workflow-executions
-
 curl -X GET  /v1/workflows
 curl -X POST /v1/workflows
 
 curl -X GET  /v1/workflows/:workflowId/executions
 curl -X POST /v1/workflows/:workflowId/executions
 curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
+
+curl -X POST /v1/jobs/delete-terminated-workflow-executions
 ```
+
+
+# Architecture Log
+
+[architecture-log](./architecture-log.md)
+
 
 # Further Improvements
 
-// STRONG
-// daniel test everything from scratch
-// daniel create unit tests, integration tests, docker-compose.test.yml, ./tests.sh
-// daniel rework the whole git history
-// Make architecture doc less verbose, potentially add it here
+## STRONG
+- more QA
+- e2e tests
+- healthcheckz endpoint
+- add logging for http requests and actors
 
-// AVERAGE
-// daniel eliminate compiling warnings/errors
-// daniel add more meaningful comments
-// daniel Dockerfile, "./publish.sh", and "production-like" working
-// daniel "/healthcheckz" endpoint
-// daniel can sbt flag when imports are unused?
+## AVERAGE
+- ./publish.sh do publish image to of the naiveworkflow app dockerhub
+- configure sbt to flag unused imports
+- learn more about akka http
+- learn more about actor model (akka/jvm in particular)
+- use EitherT in the route handlers
 
-// WEAK
-// daniel what is a dispatcher?
-// daniel how on earth does execution context work?
-// daniel logging (actors, app errors) in general?
-// daniel function toDateTime(s: String): Datetime, in com.naive_workflow.utils ??
-// daniel add EitherT
-// daniel Utils classes are candidates for property-based testing
-
-
-// NEW IDEAS GO HERE
+## WEAK
+- learn more about akka dispatchers
+- learn more about execution context
+- Utils classes are candidates for property-based testing
