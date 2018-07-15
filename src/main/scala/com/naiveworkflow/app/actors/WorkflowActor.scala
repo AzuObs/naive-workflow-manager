@@ -2,7 +2,6 @@ package com.naiveworkflow.app.actors
 
 import akka.actor.{Actor, Props}
 import com.naiveworkflow.app.models.ProposedWorkflow
-import com.naiveworkflow.app.database.WorkflowDAO
 import com.naiveworkflow.app.services.WorkflowService
 
 object WorkflowActor {
@@ -14,14 +13,14 @@ object WorkflowActor {
 
 }
 
-case class WorkflowActor(db: WorkflowDAO) extends Actor {
+case class WorkflowActor(service: WorkflowService) extends Actor {
   import WorkflowActor._
 
   def receive: Receive = {
     case GetWorkflows =>
-      sender() ! WorkflowService(db).getWorkflows
+      sender() ! service.getWorkflows
     case CreateWorkflow(proposed) =>
-      sender() ! WorkflowService(db).createWorkflow(proposed)
+      sender() ! service.createWorkflow(proposed)
   }
 
 }

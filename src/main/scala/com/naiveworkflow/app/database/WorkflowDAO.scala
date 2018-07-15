@@ -1,7 +1,6 @@
 package com.naiveworkflow.app.database
 
 import scalikejdbc._
-
 import scala.concurrent.{ExecutionContext, Future}
 import com.naiveworkflow.app.types.DAOResponse
 import com.naiveworkflow.app.models._

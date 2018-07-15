@@ -13,6 +13,7 @@ import scalikejdbc.ConnectionPool
 import com.naiveworkflow.app.actors.{WorkflowActor, WorkflowExecutionActor}
 import com.naiveworkflow.app.routes.v1.V1Routes
 import com.naiveworkflow.app.database.{WorkflowDAO, WorkflowExecutionDAO}
+import com.naiveworkflow.app.services.{WorkflowExecutionService, WorkflowService}
 
 object ManagerServer extends App with V1Routes {
   val config = ConfigFactory.load()
@@ -35,10 +36,12 @@ object ManagerServer extends App with V1Routes {
   val blockingDispatcher = system.dispatchers.lookup("blocking-io-dispatcher")
   val workflowDb = WorkflowDAO()(blockingDispatcher)
   val workflowExecutionDb = WorkflowExecutionDAO()(blockingDispatcher)
+  val workflowService = WorkflowService(workflowDb)
+  val executionService = WorkflowExecutionService(workflowExecutionDb)
   val workflowActor: ActorRef =
-    system.actorOf(Props(WorkflowActor(workflowDb)), "workflowsActor")
+    system.actorOf(Props(WorkflowActor(workflowService)), "workflowActor")
   val workflowExecutionActor: ActorRef =
-    system.actorOf(Props(WorkflowExecutionActor(workflowExecutionDb)), "executionsActor")
+    system.actorOf(Props(WorkflowExecutionActor(executionService)), "executionActor")
 
   Http()
     .bindAndHandle(routes, serverHost, serverPort)

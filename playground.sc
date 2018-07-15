@@ -1,1 +1,1 @@
-val a: Nothing = 1
+val a = java.util.UUID.randomUUID.toString

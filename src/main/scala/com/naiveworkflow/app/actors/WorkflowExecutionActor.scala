@@ -1,7 +1,6 @@
 package com.naiveworkflow.app.actors
 
 import akka.actor.{Actor, Props}
-import com.naiveworkflow.app.database.WorkflowExecutionDAO
 import com.naiveworkflow.app.services.WorkflowExecutionService
 import com.naiveworkflow.app.models.{
   ProposedWorkflowExecution,
@@ -19,18 +18,18 @@ object WorkflowExecutionActor {
 
 }
 
-case class WorkflowExecutionActor(db: WorkflowExecutionDAO) extends Actor {
+case class WorkflowExecutionActor(service: WorkflowExecutionService) extends Actor {
   import WorkflowExecutionActor._
 
   def receive: Receive = {
     case GetWorkflowExecutions(workflowId) =>
-      sender() ! WorkflowExecutionService(db).getWorkflowExecutions(workflowId)
+      sender() ! service.getWorkflowExecutions(workflowId)
     case CreateWorkflowExecution(proposed) =>
-      sender() ! WorkflowExecutionService(db).createWorkflowExecution(proposed)
+      sender() ! service.createWorkflowExecution(proposed)
     case CreateExecutionIncrementation(proposed) =>
-      sender() ! WorkflowExecutionService(db).incrementWorkflowExecution(proposed)
+      sender() ! service.incrementWorkflowExecution(proposed)
     case CreateExecutionsCleanupJob =>
-      sender() ! WorkflowExecutionService(db).deletedEndedWorkflowExecutions
+      sender() ! service.deletedEndedWorkflowExecutions
   }
 
 }

@@ -59,7 +59,6 @@ curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
 // STRONG
 // daniel test everything from scratch
 // daniel create unit tests, integration tests, docker-compose.test.yml, ./tests.sh
-// daniel create crond for scripts, maybe a Docker image?
 // daniel rework the whole git history
 
 // AVERAGE

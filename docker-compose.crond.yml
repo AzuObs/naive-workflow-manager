@@ -1,6 +1,7 @@
 version: "3"
 services:
   crond:
+    # image is a custom version of willfarrell/crontab
     build:
       context: .
       dockerfile: docker/crond/Dockerfile

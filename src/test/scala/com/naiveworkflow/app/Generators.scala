@@ -83,4 +83,6 @@ object Generators {
   def genDatetime: Datetime =
     new Timestamp(new Date().getTime).toString
 
+  def genUUID: String =
+    java.util.UUID.randomUUID.toString
 }

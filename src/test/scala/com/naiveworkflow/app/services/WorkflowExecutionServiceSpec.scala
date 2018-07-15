@@ -1,7 +1,8 @@
 package com.naiveworkflow.app.services
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 import org.scalatest._
 import org.scalamock.scalatest.MockFactory
 import com.naiveworkflow.app.Generators._
@@ -129,27 +130,27 @@ class WorkflowExecutionServiceSpec
       service.incrementWorkflowExecution(proposed) should equal(eitherFuture)
     }
 
+  // daniel - test is being a little shit
   "WorkflowExecutionService.deletedEndedWorkflowExecutions" should
     "calls db.getTerminatedWorkflowExecutions followed by db.deleteWorkflowExecutions in happy path" in {
       val db = mock[WorkflowExecutionDAO]
       val service = WorkflowExecutionService(db)
-      val executions = genMultipleWorkflowExecution()
-      val getFuture = Future { Right(executions) }
+      val executions = genMultipleWorkflowExecution(n = 0)
 
-      db.getTerminatedWorkflowExecutions _ expects() returning getFuture
-      db.deleteWorkflowExecutions _ expects executions
+      db.getTerminatedWorkflowExecutions _ expects() returns Future { Right(executions) }
+      db.deleteWorkflowExecutions _ expects executions returns Future { Right(executions) }
 
-      service.deletedEndedWorkflowExecutions
+      Await.result(service.deletedEndedWorkflowExecutions, 5.seconds)
     }
 
   it should
-    "calls db.getTerminatedWorkflowExecutions but not db.deleteWorkflowExecutions in unhappy path" in {
+    "calls db.getTerminatedWorkflowExecutions but not db.deleteWorkflowExecutions if exception" in {
       val db = mock[WorkflowExecutionDAO]
       val service = WorkflowExecutionService(db)
       val executions = genMultipleWorkflowExecution()
       val getFuture = Future { Left(genDatabaseUnexpectedException) }
 
-      db.getTerminatedWorkflowExecutions _ expects() returning getFuture
+      db.getTerminatedWorkflowExecutions _ expects() returns getFuture
       db.deleteWorkflowExecutions _ expects executions never()
 
       service.deletedEndedWorkflowExecutions
