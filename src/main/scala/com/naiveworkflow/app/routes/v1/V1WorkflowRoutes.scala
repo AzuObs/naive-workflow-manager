@@ -2,7 +2,7 @@ package com.naiveworkflow.app.routes.v1
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -13,14 +13,9 @@ import com.naiveworkflow.app.actors.WorkflowActor._
 import com.naiveworkflow.app.models._
 import com.naiveworkflow.app.utils.{WorkflowUtils => Utils}
 
-trait V1WorkflowRoutes extends WorkflowJsonSupport {
+object V1WorkflowRoutes extends WorkflowJsonSupport {
 
-  def workflowActor: ActorRef
-
-  implicit def system: ActorSystem
-  implicit def timeout: Timeout
-
-  val v1WorkflowRoutes: Route =
+  def routes(workflowActor: ActorRef)(implicit timeout: Timeout): Route =
     pathPrefix("workflows") {
       pathEnd {
         get {
@@ -41,7 +36,7 @@ trait V1WorkflowRoutes extends WorkflowJsonSupport {
           entity(as[ProposedWorkflow]) { proposed =>
             val askService: ServiceResponse[Workflow] =
               for {
-                askActor   <- (workflowActor ? CreateWorkflow).mapTo[ServiceResponse[Workflow]]
+                askActor   <- (workflowActor ? CreateWorkflow(proposed)).mapTo[ServiceResponse[Workflow]]
                 askService <- askActor
               } yield askService
 

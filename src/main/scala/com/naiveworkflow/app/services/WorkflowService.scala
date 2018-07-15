@@ -9,10 +9,10 @@ case class WorkflowService(db: WorkflowDAOInterface)
 
   protected lazy val database: WorkflowDAOInterface = db
 
-  def createWorkflow(proposed: ProposedWorkflow): ServiceResponse[Workflow] =
-    database.insertWorkflow(proposed)
-
   def getWorkflows: ServiceResponse[Vector[Workflow]] =
     database.getAllWorkflows
+
+  def createWorkflow(proposed: ProposedWorkflow): ServiceResponse[Workflow] =
+    database.insertWorkflow(proposed)
 
 }

@@ -11,11 +11,11 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import scalikejdbc.ConnectionPool
 import com.naiveworkflow.app.actors.{WorkflowActor, WorkflowExecutionActor}
-import com.naiveworkflow.app.routes.v1.V1Routes
 import com.naiveworkflow.app.database.{WorkflowDAO, WorkflowExecutionDAO}
+import com.naiveworkflow.app.routes.v1.V1Routes
 import com.naiveworkflow.app.services.{WorkflowExecutionService, WorkflowService}
 
-object ManagerServer extends App with V1Routes {
+object ManagerServer extends App {
   val config = ConfigFactory.load()
   val appName = config.getString("app.name")
   val serverHost = config.getString("server.host")
@@ -40,8 +40,9 @@ object ManagerServer extends App with V1Routes {
   val executionService = WorkflowExecutionService(workflowExecutionDb)
   val workflowActor: ActorRef =
     system.actorOf(Props(WorkflowActor(workflowService)), "workflowActor")
-  val workflowExecutionActor: ActorRef =
+  val executionActor: ActorRef =
     system.actorOf(Props(WorkflowExecutionActor(executionService)), "executionActor")
+  val routes = V1Routes.routes(workflowActor, executionActor)
 
   Http()
     .bindAndHandle(routes, serverHost, serverPort)

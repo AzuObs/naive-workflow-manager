@@ -1,7 +1,8 @@
 # App Architecture
 
 The app is a fairly standard scala server that uses akka http, akka actors, and mysql.  
-It is possibe to run the application from the command line and to make requests against it using curl 
+It is possible to run the application from the command line and to make requests against it  
+using curl 
 
 This is the high-level lifecycle of a request:
 - Requests are received in the Route handlers
@@ -17,49 +18,48 @@ Functional:
 # Run Dev
 
 ```bash
-docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml build
-docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml up
+docker-compose build
+docker-compose up
 sbt run
 ```
 
 # Run Tests
 
-// daniel TODO
+// daniel maybe if you add a separate container for testing?
 ```bash
-docker-compose --file=docker-compose.yml build
-docker-compose --file=docker-compose.yml up
+docker-compose build
+docker-compose up
 sbt test
 ```
 
-# Run "Production-like"
+# Periodic Jobs
 
-// daniel TODO
 ```bash
-docker-compose --file=docker-compose.yml --file=docker-compose.prod.yml up
+docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml build
+docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml up
+sbt run
 ```
 
 # Routes
 
-// daniel add GET route /v1/workflows/:id/executions?
 ```text
 curl -X POST /v1/jobs/delete-terminated-workflow-executions
 
 curl -X GET  /v1/workflows
 curl -X POST /v1/workflows
 
+curl -X GET  /v1/workflows/:workflowId/executions
 curl -X POST /v1/workflows/:workflowId/executions
 curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
 ```
 
-# Periodic Jobs
-
-// daniel crond documentation
-
+# Further Improvements
 
 // STRONG
 // daniel test everything from scratch
 // daniel create unit tests, integration tests, docker-compose.test.yml, ./tests.sh
 // daniel rework the whole git history
+// Make architecture doc less verbose, potentially add it here
 
 // AVERAGE
 // daniel eliminate compiling warnings/errors
@@ -71,9 +71,10 @@ curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
 // WEAK
 // daniel what is a dispatcher?
 // daniel how on earth does execution context work?
-// daniel login (actors, app errors) in general?
+// daniel logging (actors, app errors) in general?
 // daniel function toDateTime(s: String): Datetime, in com.naive_workflow.utils ??
 // daniel add EitherT
+// daniel Utils classes are candidates for property-based testing
 
-// NEW TODOS GO HERE
-// Make architecture doc less verbose, potentially add it here
+
+// NEW IDEAS GO HERE

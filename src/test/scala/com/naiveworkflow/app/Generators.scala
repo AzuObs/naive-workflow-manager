@@ -36,8 +36,8 @@ object Generators {
     ProposedWorkflowExecution(workflowId)
 
   def genProposedWorkflowExecutionIncrementation(
-    workflowId: Int = genId,
-    workflowExecutionId: Int = genId
+    workflowExecutionId: Int = genId,
+      workflowId: Int = genId
   ) = ProposedWorkflowExecutionIncrementation(workflowExecutionId, workflowId)
 
   def genSingleWorkflowExecution(

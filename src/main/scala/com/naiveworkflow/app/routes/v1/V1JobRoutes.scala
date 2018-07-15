@@ -16,21 +16,16 @@ import com.naiveworkflow.app.models.{
   WorkflowExecutionJsonSupport
 }
 
-trait V1JobRoutes extends WorkflowExecutionJsonSupport {
+object V1JobRoutes extends WorkflowExecutionJsonSupport {
 
-    def workflowExecutionActor: ActorRef
-
-    implicit def timeout: Timeout
-    implicit def system: ActorSystem
-
-    lazy val v1JobRoutes: Route =
+    def routes(executionActor: ActorRef)(implicit timeout:Timeout): Route =
       pathPrefix("jobs" / "delete-terminated-workflow-executions" ) {
         pathEnd {
           post {
             val askService: ServiceResponse[Vector[WorkflowExecution]] =
               for {
                 askActor   <-
-                  (workflowExecutionActor ? CreateExecutionsCleanupJob)
+                  (executionActor ? CreateExecutionsCleanupJob)
                     .mapTo[ServiceResponse[Vector[WorkflowExecution]]]
                 askService <-
                   askActor

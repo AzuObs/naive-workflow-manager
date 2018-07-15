@@ -1,49 +1,56 @@
-//package com.naiveworkflow.app.routes.v1
-//
-//import scala.concurrent.duration._
-//import scala.concurrent.Future
-//import scala.concurrent.ExecutionContext.Implicits.global
-//import akka.util.Timeout
-//import akka.http.scaladsl.model.StatusCodes
-//import akka.http.scaladsl.testkit.ScalatestRouteTest
-//import akka.http.scaladsl.server._
-//import Directives._
-//import akka.actor.{ActorRef, ActorSystem, Props}
-//import org.scalatest._
-//import org.scalamock.scalatest.MockFactory
-//import com.naiveworkflow.app.routes.v1.V1WorkflowRoutes
-//import com.naiveworkflow.app.Generators._
-//import com.naiveworkflow.app.ManagerServer.{blockingDispatcher, system, workflowDb}
-//import com.naiveworkflow.app.actors.WorkflowActor
-//import com.naiveworkflow.app.database.WorkflowDAO
-//import com.naiveworkflow.app.models.Workflow
-//import com.naiveworkflow.app.types.ServiceResponse
-//
-//class WorkflowRoutesSpec
-//  extends FlatSpec
-//    with Matchers
-//    with ScalatestRouteTest
-//    with MockFactory {
-//
-//  object WorkflowRoutes extends V1WorkflowRoutes {
-//    val timeout: Timeout = Timeout(5.seconds)
-//    val system = ActorSystem("NaiveWorkflowManagerServer")
-//    val workflowDb = WorkflowDAO()
-//    val workflowActor: ActorRef =
-//      system.actorOf(Props(WorkflowActor(workflowDb)), "workflowsActor")
-//  }
-//
-//  "foo" should
-//    "bar" in  {
-//      Get() ~> WorkflowRoutes.v1WorkflowRoutes ~> check {
-//        ???
-////        responseAs[Future[ServiceResponse[Vector[Workflow]]]] shouldEqual
-//      }
-//    }
-//
-//  it should
-//    "bar2" in  {
-//      assert(true)
-//    }
-//
-//}
+package com.naiveworkflow.app.routes.v1
+
+import akka.actor.Props
+import akka.http.scaladsl.model.{ContentTypes, StatusCodes}
+
+import scala.concurrent.duration._
+import scala.concurrent.Future
+import org.scalatest._
+import org.scalamock.scalatest.MockFactory
+import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.util.Timeout
+import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.actors.WorkflowActor
+import com.naiveworkflow.app.models.{Workflow, WorkflowJsonSupport, Workflows}
+import com.naiveworkflow.app.services.WorkflowService
+
+class WorkflowRoutesSpec
+  extends FlatSpec
+    with Matchers
+    with MockFactory
+    with ScalatestRouteTest
+    with WorkflowJsonSupport {
+
+  "GET /workflows " should
+    "returns (200, Workflows)" in {
+      implicit val timeout: Timeout = Timeout(5.seconds)
+      val service = mock[WorkflowService]
+      val actor = system.actorOf(Props(WorkflowActor(service)), genUUID)
+      val routes = V1WorkflowRoutes.routes(actor)
+      val workflows = genMultipleWorkflow()
+
+      service.getWorkflows _ expects() returns Future { Right(workflows) }
+
+      Get("/workflows") ~> routes ~> check {
+        status shouldEqual StatusCodes.OK
+        responseAs[Workflows] shouldEqual Workflows(workflows)
+      }}
+
+  "POST /workflows " should
+    "returns (201, Workflow)" in {
+    implicit val timeout: Timeout = Timeout(5.seconds)
+    val service = mock[WorkflowService]
+    val actor = system.actorOf(Props(WorkflowActor(service)), genUUID)
+    val routes = V1WorkflowRoutes.routes(actor)
+    val nSteps = 3
+    val workflow = genSingleWorkflow(nSteps)
+    val proposed = genProposedWorkflow(nSteps)
+
+    service.createWorkflow _ expects proposed returns Future { Right(workflow) }
+
+    Post("/workflows", proposed) ~> routes ~> check {
+      status shouldEqual StatusCodes.Created
+      responseAs[Workflow] shouldEqual workflow
+    }}
+
+}

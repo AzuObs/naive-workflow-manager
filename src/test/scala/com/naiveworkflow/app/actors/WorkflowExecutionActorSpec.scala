@@ -14,7 +14,7 @@ import com.naiveworkflow.app.Generators._
 import com.naiveworkflow.app.actors.WorkflowExecutionActor._
 
 class WorkflowExecutionActorSpec
-  extends TestKit(ActorSystem("MySpec"))
+  extends TestKit(ActorSystem(genUUID))
     with ImplicitSender
     with FlatSpecLike
     with Matchers

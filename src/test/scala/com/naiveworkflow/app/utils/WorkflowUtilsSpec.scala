@@ -4,7 +4,6 @@ import org.scalatest._
 import com.naiveworkflow.app.Generators._
 import com.naiveworkflow.app.models.{Workflow, Workflows}
 
-// daniel candidate for property based testing
 class WorkflowUtilsSpec extends FlatSpec with Matchers {
 
   "WorkflowUtils.convertWorkflowsTraversableToWorkflowsModel" should

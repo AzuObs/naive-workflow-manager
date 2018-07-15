@@ -142,16 +142,16 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
           val updates: Int =
             DB.localTx { implicit session =>
               sql"""
-                   | UPDATE
-                   |   workflow_executions we
-                   |   INNER JOIN workflows w ON w.`workflow_id` = we.`workflow_id`
-                   | SET
-                   |   we.`current_step_index` = we.`current_step_index` + 1
-                   | WHERE
-                   |   we.`current_step_index` < w.`n_steps`
-                   |   AND w.`workflow_id` = ${proposed.workflowId}
-                   |   AND we.`workflow_execution_id` = ${proposed.workflowExecutionId}
-              """
+                | UPDATE
+                |   workflow_executions we
+                |   INNER JOIN workflows w ON w.`workflow_id` = we.`workflow_id`
+                | SET
+                |   we.`current_step_index` = we.`current_step_index` + 1
+                | WHERE
+                |   we.`current_step_index` < w.`n_steps`
+                |   AND w.`workflow_id` = ${proposed.workflowId}
+                |   AND we.`workflow_execution_id` = ${proposed.workflowExecutionId}
+                """
                 .stripMargin
                 .update
                 .apply()

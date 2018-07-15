@@ -1,1 +1,3 @@
-val a = java.util.UUID.randomUUID.toString
+// daniel delete me
+
+s"\""

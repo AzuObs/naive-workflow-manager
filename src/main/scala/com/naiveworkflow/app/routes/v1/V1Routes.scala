@@ -1,18 +1,17 @@
 package com.naiveworkflow.app.routes.v1
 
+import akka.actor.ActorRef
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 
-trait V1Routes extends V1WorkflowRoutes with V1WorkflowExecutionRoutes with V1JobRoutes {
+object V1Routes {
 
-  implicit def timeout: Timeout
-
-  val routes: Route =
+  def routes(workflowActor: ActorRef, executionActor: ActorRef)(implicit timeout: Timeout): Route =
     pathPrefix("v1") {
-      v1WorkflowRoutes ~
-      v1WorkflowExecutionRoutes ~
-      v1JobRoutes
+      V1WorkflowRoutes.routes(workflowActor) ~
+      V1WorkflowExecutionRoutes.routes(executionActor) ~
+      V1JobRoutes.routes(executionActor)
     }
 
 }
