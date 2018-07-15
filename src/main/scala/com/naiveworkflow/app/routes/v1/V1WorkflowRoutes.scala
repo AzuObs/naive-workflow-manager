@@ -32,7 +32,7 @@ trait V1WorkflowRoutes extends WorkflowJsonSupport {
 
           Await.result(askService, timeout.duration) match {
             case Right(wkfls) =>
-              val workflows: Workflows = Utils.convertWorkflowsTraversableToWorkflowsModel(wkfls)
+              val workflows: Workflows = Utils.workflowsTraversableToWorkflowsModel(wkfls)
               complete(StatusCodes.OK, workflows)
             case Left(exception) => complete(exception.httpStatus, exception.message)
           }

@@ -12,7 +12,7 @@ import com.mysql.jdbc.exceptions.jdbc4.{
 case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
   extends WorkflowExecutionDAOInterface {
 
-  def getWorkflowExecutions(workflowId: Int): DAOResponse[Vector[WorkflowExecution]] =
+  def getAllWorkflowExecutions(workflowId: Int): DAOResponse[Vector[WorkflowExecution]] =
     Future {
       try {
         DB.readOnly { implicit session =>

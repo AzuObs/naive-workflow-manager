@@ -2,7 +2,7 @@ package com.naiveworkflow.app.actors
 
 import akka.actor.{Actor, Props}
 import com.naiveworkflow.app.models.ProposedWorkflow
-import com.naiveworkflow.app.database.WorkflowDAOInterface
+import com.naiveworkflow.app.database.WorkflowDAO
 import com.naiveworkflow.app.services.WorkflowService
 
 object WorkflowActor {
@@ -14,7 +14,7 @@ object WorkflowActor {
 
 }
 
-case class WorkflowActor(db: WorkflowDAOInterface) extends Actor {
+case class WorkflowActor(db: WorkflowDAO) extends Actor {
   import WorkflowActor._
 
   def receive: Receive = {

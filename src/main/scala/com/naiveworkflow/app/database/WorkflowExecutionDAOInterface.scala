@@ -11,7 +11,7 @@ import com.naiveworkflow.app.models.{
 
 trait WorkflowExecutionDAOInterface {
 
-  def getWorkflowExecutions(workflowId: Int):
+  def getAllWorkflowExecutions(workflowId: Int):
     DAOResponse[Vector[WorkflowExecution]]
 
   def getTerminatedWorkflowExecutions:

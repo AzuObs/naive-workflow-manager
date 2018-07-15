@@ -12,7 +12,7 @@ import com.naiveworkflow.app.models.{
 
 trait WorkflowExecutionServiceInterface {
 
-  protected def database: WorkflowExecutionDAOInterface
+  protected val database: WorkflowExecutionDAOInterface
 
   def getWorkflowExecutions(workflowId: Int):
     ServiceResponse[Vector[WorkflowExecution]]

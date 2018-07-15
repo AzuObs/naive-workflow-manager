@@ -8,7 +8,7 @@ import com.naiveworkflow.app.database.WorkflowDAOInterface
 
 trait WorkflowServiceInterface {
 
-  protected def database: WorkflowDAOInterface
+  protected val database: WorkflowDAOInterface
 
   def createWorkflow(proposed: ProposedWorkflow): ServiceResponse[Workflow]
 

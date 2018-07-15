@@ -1,12 +1,13 @@
 package com.naiveworkflow.app.services
 
-import com.naiveworkflow.app.types.ServiceResponse
 import com.naiveworkflow.app.database.WorkflowDAOInterface
 import com.naiveworkflow.app.models.{ProposedWorkflow, Workflow}
+import com.naiveworkflow.app.types.ServiceResponse
 
-case class WorkflowService(db: WorkflowDAOInterface) extends WorkflowServiceInterface {
+case class WorkflowService(db: WorkflowDAOInterface)
+  extends WorkflowServiceInterface {
 
-  def database: WorkflowDAOInterface = db
+  protected lazy val database: WorkflowDAOInterface = db
 
   def createWorkflow(proposed: ProposedWorkflow): ServiceResponse[Workflow] =
     database.insertWorkflow(proposed)

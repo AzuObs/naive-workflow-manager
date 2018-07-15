@@ -7,6 +7,8 @@ val versions = new {
   val jdbc = "3.1.0"
   val mysqlConnector = "5.1.38"
   val scala = "2.12.6"
+  val scalaMock = "4.1.0"
+  val scalaTest = "3.0.5"
 }
 
 version := versions.app
@@ -17,6 +19,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http"   % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-http-spray-json" % versions.akkaHttp,
   "com.typesafe.akka" %% "akka-stream" % versions.akka,
+  "com.typesafe.akka" %% "akka-testkit" % versions.akka % Test, // daniel used?
   "mysql" % "mysql-connector-java" % versions.mysqlConnector,
   "org.scalikejdbc" %% "scalikejdbc" % versions.jdbc,
+  "org.scalatest" %% "scalatest" % versions.scalaTest % Test, // daniel used?
+  "org.scalamock" %% "scalamock" % versions.scalaMock % Test, // daniel used?
 )
