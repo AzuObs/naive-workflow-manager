@@ -11,28 +11,25 @@ case class WorkflowDAO(implicit ec: ExecutionContext) extends WorkflowDAOInterfa
     Future {
       DB.readOnly { implicit session =>
         try {
-          val workflows: Vector[Workflow] = sql"""
-            | SELECT
-            |   `workflow_id` AS workflowId,
-            |   `n_steps` AS nSteps,
-            |   `created_at` AS createdAt,
-            |   `updated_at` AS updatedAt
-            | FROM
-            |   workflows
-          """
-            .stripMargin
-            .map(toWorkflow)
-            .list
-            .apply()
-            .toVector
-
-          Right(workflows)
-        }
+          Right {
+            sql"""
+              | SELECT
+              |   `workflow_id` AS workflowId,
+              |   `n_steps` AS nSteps,
+              |   `created_at` AS createdAt,
+              |   `updated_at` AS updatedAt
+              | FROM
+              |   workflows
+              """
+              .stripMargin
+              .map(toWorkflow)
+              .list
+              .apply()
+              .toVector
+          }}
         catch {
           case _: Exception => Left(DatabaseUnexpected())
-        }
-      }
-    }
+        }}}
 
   def insertWorkflow(proposed: ProposedWorkflow): DAOResponse[Workflow] =
     Future {
@@ -40,11 +37,11 @@ case class WorkflowDAO(implicit ec: ExecutionContext) extends WorkflowDAOInterfa
         val newId: Long =
           DB.localTx { implicit session =>
             sql"""
-                 | INSERT INTO
-                 |   workflows(`n_steps`)
-                 | VALUES
-                 |   (${proposed.nSteps});
-          """
+              | INSERT INTO
+              |   workflows(`n_steps`)
+              | VALUES
+              |   (${proposed.nSteps});
+              """
               .stripMargin
               .updateAndReturnGeneratedKey
               .apply()
@@ -52,16 +49,16 @@ case class WorkflowDAO(implicit ec: ExecutionContext) extends WorkflowDAOInterfa
 
         DB.readOnly { implicit session =>
           sql"""
-               |SELECT
-               |   `workflow_id` AS workflowId,
-               |   `n_steps` AS nSteps,
-               |   `created_at` AS createdAt,
-               |   `updated_at` AS updatedAt
-               | FROM
-               |   workflows
-               | WHERE
-               |   `workflow_id` =  $newId
-          """
+            |SELECT
+            |   `workflow_id` AS workflowId,
+            |   `n_steps` AS nSteps,
+            |   `created_at` AS createdAt,
+            |   `updated_at` AS updatedAt
+            | FROM
+            |   workflows
+            | WHERE
+            |   `workflow_id` =  $newId
+            """
             .stripMargin
             .map(toWorkflow)
             .single()
@@ -69,12 +66,10 @@ case class WorkflowDAO(implicit ec: ExecutionContext) extends WorkflowDAOInterfa
         } match {
           case Some(workflow) => Right(workflow)
           case None => Left(DatabaseResourceNotFound())
-        }
-      }
+        }}
       catch {
         case _: Exception => Left(DatabaseUnexpected())
-      }
-    }
+      }}
 
   private def toWorkflow(rs: WrappedResultSet): Workflow =
     Workflow(

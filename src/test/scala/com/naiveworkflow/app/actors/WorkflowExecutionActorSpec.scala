@@ -10,7 +10,7 @@ import akka.util.Timeout
 import org.scalatest._
 import org.scalamock.scalatest.MockFactory
 import com.naiveworkflow.app.services.WorkflowExecutionService
-import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.Fixtures._
 import com.naiveworkflow.app.actors.WorkflowExecutionActor._
 
 class WorkflowExecutionActorSpec

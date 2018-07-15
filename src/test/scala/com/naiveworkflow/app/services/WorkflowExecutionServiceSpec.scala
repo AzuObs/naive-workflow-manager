@@ -5,7 +5,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import org.scalatest._
 import org.scalamock.scalatest.MockFactory
-import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.Fixtures._
 import com.naiveworkflow.app.database.WorkflowExecutionDAO
 
 class WorkflowExecutionServiceSpec
@@ -130,7 +130,6 @@ class WorkflowExecutionServiceSpec
       service.incrementWorkflowExecution(proposed) should equal(eitherFuture)
     }
 
-  // daniel - test is being a little shit
   "WorkflowExecutionService.deletedEndedWorkflowExecutions" should
     "calls db.getTerminatedWorkflowExecutions followed by db.deleteWorkflowExecutions in happy path" in {
       val db = mock[WorkflowExecutionDAO]

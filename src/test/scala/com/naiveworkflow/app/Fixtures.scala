@@ -8,14 +8,14 @@ import scala.util.Random
 import com.naiveworkflow.app.types.Datetime
 import com.naiveworkflow.app.models._
 
-object Generators {
+object Fixtures {
 
-  def genProposedWorkflow(nSteps: Int = genInt(0, 10)) =
+  def genProposedWorkflow(nSteps: Int = genInt(1, 10)) =
     ProposedWorkflow(
       nSteps
     )
 
-  def genSingleWorkflow(nSteps: Int = genInt(0, 10)) =
+  def genSingleWorkflow(nSteps: Int = genInt(1, 10)) =
     Workflow(
       genId,
       nSteps,
@@ -66,6 +66,12 @@ object Generators {
 
   def genDatabaseUnexpectedException =
     DatabaseUnexpected()
+
+  def genBusinessStepsTooSmallException =
+    BusinessStepsTooSmall()
+
+  def genBusinessStepsTooBigException =
+    BusinessStepsTooBig()
 
   def genInt(min: Int, max: Int): Int = {
     assert(min < max)

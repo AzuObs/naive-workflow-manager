@@ -3,11 +3,9 @@ package com.naiveworkflow.app.database
 import scala.collection.immutable.Vector
 import scala.concurrent.{ExecutionContext, Future}
 import scalikejdbc._
-import com.naiveworkflow.app.types.DAOResponse
+import com.naiveworkflow.app.types.{DAOResponse, IO}
 import com.naiveworkflow.app.models._
-import com.mysql.jdbc.exceptions.jdbc4.{
-  MySQLIntegrityConstraintViolationException => ConstraintViolationException
-}
+import com.mysql.jdbc.exceptions.jdbc4.{MySQLIntegrityConstraintViolationException => ConstraintViolationException}
 
 case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
   extends WorkflowExecutionDAOInterface {
@@ -32,7 +30,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
           case None => Left(DatabaseResourceNotFound())
           case Some(_) =>
             DB.readOnly { implicit session =>
-              val executions =
+              Right {
                 sql"""
                   | SELECT
                   |   we.`workflow_execution_id` AS workflowExecutionId,
@@ -51,10 +49,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
                   .list
                   .apply()
                   .toVector
-
-              Right(executions)
-            }}
-      }
+              }}}}
       catch {
         case _: Exception => Left(DatabaseUnexpected())
       }}
@@ -63,7 +58,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
     Future {
       try {
         DB.readOnly { implicit session =>
-          val executions =
+          Right {
             sql"""
                  |SELECT
                  |   we.`workflow_execution_id` AS workflowExecutionId,
@@ -82,10 +77,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
               .list
               .apply()
               .toVector
-
-          Right(executions)
-        }
-      }
+          }}}
       catch {
         case _: Exception => Left(DatabaseUnexpected())
       }}
@@ -93,47 +85,52 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
   def insertWorkflowExecution(proposed: ProposedWorkflowExecution): DAOResponse[WorkflowExecution] =
     Future {
       try {
-        val newId =
-          DB.localTx { implicit session =>
-            sql"""
-                 | INSERT INTO
-                 |   workflow_executions(`workflow_id`, `current_step_index`)
-                 | VALUES
-                 |   (${proposed.workflowId}, 0);
-              """
-              .stripMargin
-              .updateAndReturnGeneratedKey
-              .apply()
-          }
+        val updated: IO[Long] = {
+          try {
+            Right {
+              DB.localTx { implicit session =>
+                sql"""
+                | INSERT INTO
+                |   workflow_executions(`workflow_id`, `current_step_index`)
+                | VALUES
+                |   (${proposed.workflowId}, 0);
+                """
+                  .stripMargin
+                  .updateAndReturnGeneratedKey
+                  .apply()
+              }}}
+          catch {
+            case _: ConstraintViolationException => Left(DatabaseResourceNotFound())
+            case _: Exception => Left(DatabaseUnexpected())
+          }}
 
-        DB.readOnly { implicit session =>
-          sql"""
-               | SELECT
-               |   `workflow_execution_id` AS workflowExecutionId,
-               |   `workflow_id` AS workflowId,
-               |   `current_step_index` AS currentStepIndex,
-               |   `created_at` AS createdAt,
-               |   `updated_at` AS updatedAt
-               | FROM
-               |   workflow_executions
-               | WHERE
-               |   `workflow_execution_id` = $newId
-            """
-            .stripMargin
-            .map(toWorkflowExecution)
-            .single()
-            .apply()
-        } match {
-          case Some(workflowExecution) => Right(workflowExecution)
-          case None => Left(DatabaseResourceNotFound())
-        }
-      }
+        updated match {
+          case Left(exception) => Left(exception)
+          case Right(id) =>
+            DB.readOnly { implicit session =>
+              sql"""
+                | SELECT
+                |   `workflow_execution_id` AS workflowExecutionId,
+                |   `workflow_id` AS workflowId,
+                |   `current_step_index` AS  currentStepIndex,
+                |   `created_at` AS createdAt,
+                |   `updated_at` AS updatedAt
+                | FROM
+                |   workflow_executions
+                | WHERE
+                |   `workflow_execution_id` = $id
+                """
+                .stripMargin
+                .map(toWorkflowExecution)
+                .single()
+                .apply()
+            } match {
+              case Some(workflowExecution) => Right(workflowExecution)
+              case None => Left(DatabaseResourceNotFound())
+            }}}
       catch {
-        case _: ConstraintViolationException => Left(DatabaseResourceNotFound())
-        case e: Exception => {
-          println(e)
-          Left(DatabaseUnexpected())
-        }}}
+        case _: Exception => Left(DatabaseUnexpected())
+      }}
 
   def incrementWorkflowExecution(proposed: ProposedWorkflowExecutionIncrementation):
     DAOResponse[WorkflowExecution] =
@@ -180,8 +177,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
             } match {
               case Some(execution) => Right(execution)
               case None => Left(DatabaseResourceNotFound())
-            }
-        }
+            }}
         catch {
           case _: Exception => Left(DatabaseUnexpected())
         }}
@@ -205,8 +201,7 @@ case class WorkflowExecutionDAO(implicit ec: ExecutionContext)
               .apply()
 
             Right(workflowExecutions)
-          }
-        }
+          }}
         catch {
           case _: Exception => Left(DatabaseUnexpected())
         }}

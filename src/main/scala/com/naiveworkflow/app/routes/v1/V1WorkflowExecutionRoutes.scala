@@ -20,10 +20,10 @@ object V1WorkflowExecutionRoutes extends WorkflowExecutionJsonSupport {
       (workflowId, executionId) =>
         pathEnd {
           post {
+            val proposed = ProposedWorkflowExecutionIncrementation(executionId, workflowId)
             val askService: ServiceResponse[WorkflowExecution] =
               for {
-                askActor   <- (executionActor ? CreateExecutionIncrementation(
-                  ProposedWorkflowExecutionIncrementation(executionId, workflowId)))
+                askActor   <- (executionActor ? CreateExecutionIncrementation(proposed))
                   .mapTo[ServiceResponse[WorkflowExecution]]
                 askService <- askActor
               } yield askService
@@ -53,9 +53,10 @@ object V1WorkflowExecutionRoutes extends WorkflowExecutionJsonSupport {
           }
         } ~
         post {
+          val proposed = ProposedWorkflowExecution(workflowId)
           val askService: ServiceResponse[WorkflowExecution] =
             for {
-              askActor   <- (executionActor ? CreateWorkflowExecution(ProposedWorkflowExecution(workflowId)))
+              askActor   <- (executionActor ? CreateWorkflowExecution(proposed))
                 .mapTo[ServiceResponse[WorkflowExecution]]
               askService <- askActor
             } yield askService

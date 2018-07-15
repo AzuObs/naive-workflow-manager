@@ -1,7 +1,7 @@
 package com.naiveworkflow.app.utils
 
 import org.scalatest._
-import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.Fixtures._
 import com.naiveworkflow.app.models.{WorkflowExecution, WorkflowExecutions}
 
 class WorkflowExecutionUtilsSpec extends FlatSpec with Matchers {

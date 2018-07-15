@@ -10,7 +10,7 @@ import akka.util.Timeout
 import org.scalatest._
 import org.scalamock.scalatest.MockFactory
 import com.naiveworkflow.app.services.WorkflowService
-import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.Fixtures._
 import com.naiveworkflow.app.actors.WorkflowActor.{CreateWorkflow, GetWorkflows}
 
 class WorkflowActorSpec
@@ -37,7 +37,6 @@ class WorkflowActorSpec
       Await.result(actor ? GetWorkflows, 5.seconds) should equal(res)
     }
 
-  // daniel what happens when an actor doesn't deliver?
   "WorkflowActor.CreateWorkflow" should
     "calls and returns workflow service CreateWorkflow result" in  {
       implicit val timeout: Timeout = Timeout(5.seconds)

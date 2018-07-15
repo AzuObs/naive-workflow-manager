@@ -9,7 +9,7 @@ import org.scalatest._
 import org.scalamock.scalatest.MockFactory
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import com.naiveworkflow.app.Generators._
+import com.naiveworkflow.app.Fixtures._
 import com.naiveworkflow.app.actors.WorkflowActor
 import com.naiveworkflow.app.models.{Workflow, WorkflowJsonSupport, Workflows}
 import com.naiveworkflow.app.services.WorkflowService
