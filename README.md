@@ -1,5 +1,4 @@
 // daniel rework the whole git history  
-// daniel Make architecture doc less verbose, potentially add it here  
 // daniel add more meaningful comments  
 // daniel one last check that everything works
 
@@ -61,9 +60,9 @@ curl -X POST /v1/jobs/delete-terminated-workflow-executions
 ```
 
 
-# Architecture Log
+# Architecture Log Document
 
-[architecture-log](./architecture-log.md)
+[architecture-log](./docs/architecture-log.md)
 
 
 # Further Improvements
