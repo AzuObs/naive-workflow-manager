@@ -1,7 +1,3 @@
-// daniel rework the whole git history  
-// daniel add more meaningful comments  
-// daniel one last check that everything works
-
 # App Architecture
 
 The app is a fairly standard scala server that uses akka http, akka actors, and mysql.  
@@ -15,8 +11,18 @@ This is the high-level lifecycle of a request:
 - Service uses a DatabaseAccessObject
 
 Functional:
-- The data is kept almost entirely immutable
+- The data is almost entirely immutable
 - Side effects are handled at the edge of the application (inside DatabaseAccessObjects)
+
+
+# Dependencies
+
+The project assumes you have installed:
+- Java 8 JDK
+- Scala compiler 2.12.1+ 
+- sbt
+- Docker
+- Docker-compose
 
 
 # Run Dev
@@ -39,24 +45,20 @@ sbt test
 
 # Periodic Jobs
 
-```bash
-docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml build
-docker-compose --file=docker-compose.yml --file=docker-compose.crond.yml up
-sbt run
-```
+Periodic job run in the `crond` docker container. There is a `docker/crond/config.json` describing the periodic job being run.
 
 
 # HTTP Routes
 
 ```text
-curl -X GET  /v1/workflows
-curl -X POST /v1/workflows
+curl -X GET  localhost:8080/v1/workflows
+curl -X POST localhost:8080/v1/workflows -H "Content-Type: application/json" --data '{"nSteps": 3}'
 
-curl -X GET  /v1/workflows/:workflowId/executions
-curl -X POST /v1/workflows/:workflowId/executions
-curl -X POST /v1/workflows/:workflowId/executions/:executionId/incrementations
+curl -X GET  localhost:8080/v1/workflows/:workflowId/executions
+curl -X POST localhost:8080/v1/workflows/:workflowId/executions
+curl -X POST localhost:8080/v1/workflows/:workflowId/executions/:executionId/incrementations
 
-curl -X POST /v1/jobs/delete-terminated-workflow-executions
+curl -X POST localhost:8080/v1/jobs/delete-terminated-workflow-executions
 ```
 
 
@@ -67,20 +69,21 @@ curl -X POST /v1/jobs/delete-terminated-workflow-executions
 
 # Further Improvements
 
-## STRONG
+## Strong
 - more QA
 - e2e tests
 - healthcheckz endpoint
 - add logging for http requests and actors
 
-## AVERAGE
+## Average
 - ./publish.sh do publish image to of the naiveworkflow app dockerhub
+- create an APIResponse JSON formatted as `{"data": {}, "errors": []}` for each endpoint
 - configure sbt to flag unused imports
 - learn more about akka http
 - learn more about actor model (akka/jvm in particular)
 - use EitherT in the route handlers
 
-## WEAK
+## Weak
 - learn more about akka dispatchers
 - learn more about execution context
 - Utils classes are candidates for property-based testing

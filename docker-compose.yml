@@ -10,3 +10,22 @@ services:
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     command: mysqld --max_allowed_packet=128M --sql-mode=""
+
+
+  # had to make a customised verion of the image for it to work on my machine
+  # uncomment the "image" property and comment the "build" property if the
+  # image isn't working on your machine
+  crond:
+      # image: willfarrell/crontab
+      build:
+        context: .
+        dockerfile: docker/crond/Dockerfile
+      restart: always
+      network_mode: host
+      environment:
+        HOST: "localhost"
+        PORT: "8080"
+      volumes:
+        - "./docker/crond/config.json:/opt/crontab/config.json"
+        - "./docker/crond/logs:/var/log/crontab"
+        - "/var/run/docker.sock:/var/run/docker.sock"
